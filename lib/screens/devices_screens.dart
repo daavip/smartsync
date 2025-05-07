@@ -1,18 +1,41 @@
 import 'package:flutter/material.dart';
 import '../models/device.dart';
 import '../widgets/device_tile.dart';
+import '../widgets/main_navigation.dart';
 import 'air_conditioner_screen.dart';
 import 'lamp_screen.dart';
 import 'assistant_screen.dart';
 import 'generic_device_screen.dart';
 
 class DevicesScreen extends StatefulWidget {
+  const DevicesScreen({super.key});
+
   @override
-  _DevicesScreenState createState() => _DevicesScreenState();
+  DevicesScreenState createState() => DevicesScreenState();
 }
 
-class _DevicesScreenState extends State<DevicesScreen> {
+class DevicesScreenState extends State<DevicesScreen> {
   final List<Device> _devices = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Adicionando dispositivos iniciais para teste
+    _devices.addAll([
+      Device(
+        name: 'Ar Condicionado',
+        description: 'Ar-condicionado da sala',
+        icon: Icons.ac_unit,
+        type: DeviceType.airConditioner,
+      ),
+      Device(
+        name: 'Lâmpada',
+        description: 'Lâmpada do quarto',
+        icon: Icons.lightbulb,
+        type: DeviceType.lamp,
+      ),
+    ]);
+  }
 
   void _addDevice() {
     final nameController = TextEditingController();
@@ -22,17 +45,17 @@ class _DevicesScreenState extends State<DevicesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Adicionar Dispositivo'),
+        title: const Text('Adicionar Dispositivo'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: 'Nome'),
+              decoration: const InputDecoration(labelText: 'Nome'),
             ),
             TextField(
               controller: descriptionController,
-              decoration: InputDecoration(labelText: 'Descrição'),
+              decoration: const InputDecoration(labelText: 'Descrição'),
             ),
             DropdownButton<DeviceType>(
               value: selectedType,
@@ -71,7 +94,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
               });
               Navigator.pop(context);
             },
-            child: Text('Adicionar'),
+            child: const Text('Adicionar'),
           )
         ],
       ),
@@ -103,34 +126,34 @@ class _DevicesScreenState extends State<DevicesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dispositivos'),
+        title: const Text('Dispositivos'),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: _addDevice,
           )
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.devices), label: 'Dispositivos'),
-          BottomNavigationBarItem(icon: Icon(Icons.room), label: 'Cômodos'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Configurações'),
-        ],
-      ),
-      body: ListView.builder(
-        itemCount: _devices.length,
-        itemBuilder: (context, index) {
-          final device = _devices[index];
-          return DeviceTile(
-            name: device.name,
-            description: device.description,
-            icon: device.icon,
-            onTap: () => _navigateToDevice(device),
-          );
-        },
-      ),
+      bottomNavigationBar: const MainNavigation(currentIndex: 0),
+      body: _devices.isEmpty
+          ? const Center(
+              child: Text(
+                'Nenhum dispositivo cadastrado.',
+                style: TextStyle(fontSize: 16),
+              ),
+            )
+          : ListView.builder(
+              itemCount: _devices.length,
+              itemBuilder: (context, index) {
+                final device = _devices[index];
+                return DeviceTile(
+                  name: device.name,
+                  description: device.description,
+                  icon: device.icon,
+                  onTap: () => _navigateToDevice(device),
+                );
+              },
+            ),
     );
   }
 }

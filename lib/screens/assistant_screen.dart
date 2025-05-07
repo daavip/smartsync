@@ -3,7 +3,7 @@ import '../models/device.dart';
 
 class AssistantScreen extends StatelessWidget {
   final Device device;
-  const AssistantScreen({required this.device});
+  const AssistantScreen({super.key, required this.device});
 
   @override
   Widget build(BuildContext context) {

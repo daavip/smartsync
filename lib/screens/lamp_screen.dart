@@ -3,13 +3,13 @@ import '../models/device.dart';
 
 class LampScreen extends StatefulWidget {
   final Device device;
-  const LampScreen({required this.device});
+  const LampScreen({super.key, required this.device});
 
   @override
-  _LampScreenState createState() => _LampScreenState();
+  LampScreenState createState() => LampScreenState();
 }
 
-class _LampScreenState extends State<LampScreen> {
+class LampScreenState extends State<LampScreen> {
   bool isOn = false;
 
   @override

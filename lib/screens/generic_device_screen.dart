@@ -3,7 +3,7 @@ import '../models/device.dart';
 
 class GenericDeviceScreen extends StatelessWidget {
   final Device device;
-  const GenericDeviceScreen({required this.device});
+  const GenericDeviceScreen({super.key, required this.device});
 
   @override
   Widget build(BuildContext context) {

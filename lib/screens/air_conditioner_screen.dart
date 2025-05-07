@@ -1,28 +1,38 @@
 import 'package:flutter/material.dart';
 import '../models/device.dart';
 
-class AirConditionerScreen extends StatelessWidget {
+class AirConditionerScreen extends StatefulWidget {
   final Device device;
-  const AirConditionerScreen({required this.device});
+  const AirConditionerScreen({super.key, required this.device});
+
+  @override
+  _AirConditionerScreenState createState() => _AirConditionerScreenState();
+}
+
+class _AirConditionerScreenState extends State<AirConditionerScreen> {
+  double temperature = 22; // Variável de estado para a temperatura
 
   @override
   Widget build(BuildContext context) {
-    double temperature = 22;
     return Scaffold(
-      appBar: AppBar(title: Text(device.name)),
+      appBar: AppBar(title: Text(widget.device.name)),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Temperatura', style: TextStyle(fontSize: 24)),
+          const Text('Temperatura', style: TextStyle(fontSize: 24)),
           Slider(
             value: temperature,
             min: 16,
             max: 30,
             divisions: 14,
             label: '${temperature.round()}°C',
-            onChanged: (val) {},
+            onChanged: (val) {
+              setState(() {
+                temperature = val; // Atualiza a temperatura
+              });
+            },
           ),
-          Text('${temperature.round()}°C', style: TextStyle(fontSize: 32)),
+          Text('${temperature.round()}°C', style: const TextStyle(fontSize: 32)),
         ],
       ),
     );
