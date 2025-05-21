@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
-import 'screens/devices_screens.dart';
+import 'presentation/navigation/bottom_nav_bar.dart';
 
-void main() => runApp(SmartSyncApp());
+void main() {
+  runApp(MyApp());
+}
 
-class SmartSyncApp extends StatelessWidget {
-  const SmartSyncApp({super.key});
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Smart Sink',
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
-      home: DevicesScreen(),
+      debugShowCheckedModeBanner: false,
+      title: 'Smart Home App',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Colors.blue,
+        ),
+      ),
+      home: BottomNavBar(),
     );
   }
 }
