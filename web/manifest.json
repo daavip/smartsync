@@ -1,6 +1,6 @@
 {
-    "name": "smartsink",
-    "short_name": "smartsink",
+    "name": "smartsync",
+    "short_name": "smartsync",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

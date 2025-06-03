@@ -7,6 +7,10 @@ class DeviceProvider with ChangeNotifier {
   List<Device> _devices = [];
   bool _isLoading = false;
 
+  DeviceProvider() {
+    loadDevices();
+  }
+
   List<Device> get devices => _devices;
   bool get isLoading => _isLoading;
 
@@ -14,8 +18,13 @@ class DeviceProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _devices = await _repository.getAllDevices();
-    
+    try {
+      _devices = await _repository.getAllDevices();
+    } catch (e) {
+      debugPrint('Erro ao carregar dispositivos: $e');
+      _devices = [];
+    }
+
     _isLoading = false;
     notifyListeners();
   }
@@ -24,29 +33,49 @@ class DeviceProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await _repository.addDevice(device);
-    await loadDevices();
+    try {
+      await _repository.addDevice(device);
+      await loadDevices();
+    } catch (e) {
+      debugPrint('Erro ao adicionar dispositivo: $e');
+      rethrow;
+    }
   }
 
   Future<void> updateDevice(Device device) async {
     _isLoading = true;
     notifyListeners();
 
-    await _repository.updateDevice(device);
-    await loadDevices();
+    try {
+      await _repository.updateDevice(device);
+      await loadDevices();
+    } catch (e) {
+      debugPrint('Erro ao atualizar dispositivo: $e');
+      rethrow;
+    }
   }
 
   Future<void> toggleDeviceStatus(String deviceId) async {
-    final device = _devices.firstWhere((d) => d.id == deviceId);
-    final updatedDevice = device.copyWith(isOn: !device.isOn);
-    await updateDevice(updatedDevice);
+    try {
+      final device = _devices.firstWhere((d) => d.id == deviceId);
+      final updatedDevice = device.copyWith(isOn: !device.isOn);
+      await updateDevice(updatedDevice);
+    } catch (e) {
+      debugPrint('Erro ao alterar status do dispositivo: $e');
+      rethrow;
+    }
   }
 
   Future<void> deleteDevice(String deviceId) async {
     _isLoading = true;
     notifyListeners();
 
-    await _repository.deleteDevice(deviceId);
-    await loadDevices();
+    try {
+      await _repository.deleteDevice(deviceId);
+      await loadDevices();
+    } catch (e) {
+      debugPrint('Erro ao deletar dispositivo: $e');
+      rethrow;
+    }
   }
 }

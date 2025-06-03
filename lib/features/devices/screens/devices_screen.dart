@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../data/providers/device_provider.dart';
-import '../../../../data/providers/room_provider.dart';
-import '../../../../core/widgets/device_card.dart';
+import '../../../data/providers/device_provider.dart';
+import '../../../data/providers/room_provider.dart';
+import '../widgets/device_list.dart';
 import 'device_edit_screen.dart';
-import '../../../../data/models/device_model.dart';
+import '../../../data/models/device_model.dart';
+import '../../../data/models/device_type.dart';
 
 class DevicesScreen extends StatelessWidget {
   const DevicesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final deviceProvider = Provider.of<DeviceProvider>(context);
-    final roomProvider = Provider.of<RoomProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dispositivos'),
@@ -21,58 +19,64 @@ class DevicesScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              deviceProvider.loadDevices();
-              roomProvider.loadRooms();
+              context.read<DeviceProvider>().loadDevices();
+              context.read<RoomProvider>().loadRooms();
             },
           ),
         ],
       ),
-      body:
-          deviceProvider.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                itemCount: deviceProvider.devices.length,
-                itemBuilder: (context, index) {
-                  final device = deviceProvider.devices[index];
-                  final roomName = roomProvider.getRoomNameById(device.roomId);
-                  return DeviceCard(
-                    name: device.name,
-                    room: roomName,
-                    isOn: device.isOn,
-                    onTap: () {
-                      deviceProvider.toggleDeviceStatus(device.id);
-                    },
-                    onEdit: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => DeviceEditScreen(device: device),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (_) => DeviceEditScreen(
-                    device: Device(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      name: 'Novo Dispositivo',
-                      roomId:
-                          roomProvider.rooms.isNotEmpty
-                              ? roomProvider.rooms.first.id
-                              : '',
-                    ),
+      body: Consumer2<DeviceProvider, RoomProvider>(
+        builder: (context, deviceProvider, roomProvider, child) {
+          if (deviceProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (roomProvider.rooms.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  'Adicione um cômodo primeiro para poder adicionar dispositivos',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
                   ),
-            ),
+                ),
+              ),
+            );
+          }
+
+          return DeviceList(
+            devices: deviceProvider.devices,
+            onUpdateDevice: deviceProvider.updateDevice,
           );
         },
-        child: const Icon(Icons.add),
+      ),
+      floatingActionButton: Consumer<RoomProvider>(
+        builder: (context, roomProvider, _) {
+          if (roomProvider.rooms.isEmpty) return const SizedBox.shrink();
+
+          return FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => DeviceEditScreen(
+                    device: Device(
+                      id: '',
+                      name: '',
+                      roomId: roomProvider.rooms.first.id,
+                      type: DeviceType.light,
+                      isOn: false,
+                    ),
+                  ),
+                ),
+              );
+            },
+            child: const Icon(Icons.add),
+          );
+        },
       ),
     );
   }

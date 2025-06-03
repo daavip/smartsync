@@ -7,6 +7,10 @@ class RoomProvider with ChangeNotifier {
   List<Room> _rooms = [];
   bool _isLoading = false;
 
+  RoomProvider() {
+    loadRooms();
+  }
+
   List<Room> get rooms => _rooms;
   bool get isLoading => _isLoading;
 
@@ -14,8 +18,13 @@ class RoomProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _rooms = await _repository.getAllRooms();
-    
+    try {
+      _rooms = await _repository.getAllRooms();
+    } catch (e) {
+      debugPrint('Erro ao carregar cômodos: $e');
+      _rooms = [];
+    }
+
     _isLoading = false;
     notifyListeners();
   }
@@ -24,24 +33,39 @@ class RoomProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await _repository.addRoom(room);
-    await loadRooms();
+    try {
+      await _repository.addRoom(room);
+      await loadRooms();
+    } catch (e) {
+      debugPrint('Erro ao adicionar cômodo: $e');
+      rethrow;
+    }
   }
 
   Future<void> updateRoom(Room room) async {
     _isLoading = true;
     notifyListeners();
 
-    await _repository.updateRoom(room);
-    await loadRooms();
+    try {
+      await _repository.updateRoom(room);
+      await loadRooms();
+    } catch (e) {
+      debugPrint('Erro ao atualizar cômodo: $e');
+      rethrow;
+    }
   }
 
   Future<void> deleteRoom(String roomId) async {
     _isLoading = true;
     notifyListeners();
 
-    await _repository.deleteRoom(roomId);
-    await loadRooms();
+    try {
+      await _repository.deleteRoom(roomId);
+      await loadRooms();
+    } catch (e) {
+      debugPrint('Erro ao deletar cômodo: $e');
+      rethrow;
+    }
   }
 
   String getRoomNameById(String roomId) {

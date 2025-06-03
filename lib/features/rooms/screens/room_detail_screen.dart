@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/providers/device_provider.dart';
 import '../../../../data/providers/room_provider.dart';
-import '../../../../core/widgets/device_card.dart';
+import '../../devices/widgets/device_list.dart';
 import '../../devices/screens/device_edit_screen.dart';
+import '../../../../data/models/device_model.dart';
+import '../../../../data/models/device_type.dart';
 
 class RoomDetailScreen extends StatelessWidget {
   final String roomId;
@@ -12,39 +14,53 @@ class RoomDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final roomProvider = Provider.of<RoomProvider>(context);
-    final deviceProvider = Provider.of<DeviceProvider>(context);
-    
-    final room = roomProvider.rooms.firstWhere((r) => r.id == roomId);
-    final devicesInRoom = deviceProvider.devices
-        .where((device) => room.deviceIds.contains(device.id))
-        .toList();
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(room.name),
+        title: Selector<RoomProvider, String>(
+          selector: (_, provider) =>
+              provider.rooms.firstWhere((r) => r.id == roomId).name,
+          builder: (context, roomName, _) => Text(roomName),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              context.read<DeviceProvider>().loadDevices();
+              context.read<RoomProvider>().loadRooms();
+            },
+          ),
+        ],
       ),
-      body: ListView.builder(
-        itemCount: devicesInRoom.length,
-        itemBuilder: (context, index) {
-          final device = devicesInRoom[index];
-          return DeviceCard(
-            name: device.name,
-            room: room.name,
-            isOn: device.isOn,
-            onTap: () {
-              deviceProvider.toggleDeviceStatus(device.id);
-            },
-            onEdit: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => DeviceEditScreen(device: device),
-                ),
-              );
-            },
+      body: Selector<DeviceProvider, List<Device>>(
+        selector: (_, provider) => provider.devices
+            .where((device) => device.roomId == roomId)
+            .toList(),
+        builder: (context, devicesInRoom, _) {
+          return DeviceList(
+            devices: devicesInRoom,
+            onUpdateDevice: context.read<DeviceProvider>().updateDevice,
+            roomId: roomId,
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DeviceEditScreen(
+                device: Device(
+                  id: '',
+                  name: '',
+                  roomId: roomId,
+                  type: DeviceType.light,
+                  isOn: false,
+                ),
+              ),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -23,47 +23,71 @@ class RoomsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body:
-          roomProvider.isLoading
-              ? const Center(child: CircularProgressIndicator())
+      body: roomProvider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : roomProvider.rooms.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.room_outlined,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Nenhum cômodo cadastrado',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Toque no botão + para adicionar um cômodo',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[500],
+                            ),
+                      ),
+                    ],
+                  ),
+                )
               : ListView.builder(
-                itemCount: roomProvider.rooms.length,
-                itemBuilder: (context, index) {
-                  final room = roomProvider.rooms[index];
-                  return RoomCard(
-                    name: room.name,
-                    deviceCount: room.deviceIds.length,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => RoomDetailScreen(roomId: room.id),
-                        ),
-                      );
-                    },
-                    onEdit: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => RoomEditScreen(room: room),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                  itemCount: roomProvider.rooms.length,
+                  itemBuilder: (context, index) {
+                    final room = roomProvider.rooms[index];
+                    return RoomCard(
+                      name: room.name,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RoomDetailScreen(roomId: room.id),
+                          ),
+                        );
+                      },
+                      onEdit: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RoomEditScreen(room: room),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder:
-                  (_) => RoomEditScreen(
-                    room: Room(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      name: 'Novo Cômodo',
-                    ),
-                  ),
+              builder: (_) => RoomEditScreen(
+                room: Room(
+                  id: '',
+                  name: '',
+                ),
+              ),
             ),
           );
         },
