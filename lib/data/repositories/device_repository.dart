@@ -1,11 +1,13 @@
 import '../models/device_model.dart';
 import '../../core/services/storage_service.dart';
+import '../../core/services/api_service.dart';
 
 class DeviceRepository {
   static const String _devicesKey = 'devices';
   List<Device> _devices = [];
   late StorageService _storage;
   bool _initialized = false;
+  final ApiService _apiService = ApiService();
 
   Future<void> _init() async {
     if (!_initialized) {
@@ -42,9 +44,7 @@ class DeviceRepository {
 
   Future<Device> addDevice(Device device) async {
     await _init();
-    final newDevice = device.copyWith(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-    );
+    final newDevice = await _apiService.addDevice(device);
     _devices.add(newDevice);
     await _saveDevicesToStorage();
     return newDevice;

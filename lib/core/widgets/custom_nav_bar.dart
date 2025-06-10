@@ -46,7 +46,8 @@ class CustomNavBar extends StatelessWidget {
         items: [
           _buildNavItem(Icons.devices, 'Dispositivos', 0),
           _buildNavItem(Icons.room, 'Cômodos', 1),
-          _buildNavItem(Icons.settings, 'Configurações', 2),
+          _buildNavItem(Icons.home, 'Residências', 2),
+          _buildNavItem(Icons.account_circle, 'Login', 3),
         ],
       ),
     );

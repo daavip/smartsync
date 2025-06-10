@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../features/devices/screens/devices_screen.dart';
 import '../features/rooms/screens/rooms_screen.dart';
-import '../features/settings/screens/settings_screen.dart';
+import '../features/residences/screens/residences_screen.dart';
+import '../features/login/screens/login_screen.dart';
 import '../core/widgets/custom_nav_bar.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -14,10 +15,11 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
+  final List<Widget> _screens = [
     DevicesScreen(),
     RoomsScreen(),
-    SettingsScreen(),
+    ResidencesScreen(),
+    LoginScreen(),
   ];
 
   @override

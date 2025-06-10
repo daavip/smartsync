@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/services/api_service.dart';
 import '../../../../data/models/room_model.dart';
 import '../../../../data/providers/room_provider.dart';
 
@@ -17,11 +20,33 @@ class _RoomEditScreenState extends State<RoomEditScreen> {
   late final TextEditingController _nameController;
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
+  String? _selectedResidenciaId;
+  List<Map<String, dynamic>> _residencias = [];
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.room.name);
+    _carregarResidencias();
+  }
+
+  Future<void> _carregarResidencias() async {
+    setState(() => _isSaving = true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final usuarioId = prefs.getString('usuario_id');
+      if (usuarioId != null) {
+        final api = ApiService();
+        final lista = await api.listarResidenciasPorUsuario(usuarioId);
+        setState(() {
+          _residencias = lista;
+          if (_residencias.isNotEmpty) {
+            _selectedResidenciaId = _residencias.first['id'];
+          }
+        });
+      }
+    } catch (_) {}
+    setState(() => _isSaving = false);
   }
 
   @override
@@ -31,24 +56,24 @@ class _RoomEditScreenState extends State<RoomEditScreen> {
   }
 
   Future<void> _saveRoom() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate() || _selectedResidenciaId == null)
+      return;
 
     setState(() => _isSaving = true);
     HapticFeedback.mediumImpact();
 
     try {
-      final roomProvider = Provider.of<RoomProvider>(context, listen: false);
-      final updatedRoom = Room(
-        id: widget.room.id,
-        name: _nameController.text.trim(),
-      );
-
-      if (widget.room.id.isEmpty) {
-        await roomProvider.addRoom(updatedRoom);
-      } else {
-        await roomProvider.updateRoom(updatedRoom);
-      }
-
+      final api = ApiService();
+      final uuid = const Uuid();
+      final now = DateTime.now().toUtc().toIso8601String();
+      final comodoJson = {
+        'id': uuid.v4(),
+        'createdAt': now,
+        'nome': _nameController.text.trim(),
+        'residenciaId': _selectedResidenciaId,
+        'dispositivos': [],
+      };
+      await api.addComodo(comodoJson);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -123,6 +148,34 @@ class _RoomEditScreenState extends State<RoomEditScreen> {
                 enabled: !_isSaving,
                 textCapitalization: TextCapitalization.words,
                 autofocus: widget.room.id.isEmpty,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedResidenciaId,
+                items: _residencias.map((res) {
+                  return DropdownMenuItem<String>(
+                    value: res['id'],
+                    child: Text(res['endereco'] ?? 'Sem endereço'),
+                  );
+                }).toList(),
+                onChanged: _isSaving
+                    ? null
+                    : (value) {
+                        setState(() {
+                          _selectedResidenciaId = value;
+                        });
+                      },
+                decoration: const InputDecoration(
+                  labelText: 'Residência',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.home),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Selecione uma residência';
+                  }
+                  return null;
+                },
               ),
             ],
           ),

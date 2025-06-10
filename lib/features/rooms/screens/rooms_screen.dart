@@ -1,31 +1,71 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/services/api_service.dart';
 import '../../../../data/providers/room_provider.dart';
 import '../../../../core/widgets/room_card.dart';
 import 'room_edit_screen.dart';
 import 'room_detail_screen.dart';
 import '../../../../data/models/room_model.dart';
 
-class RoomsScreen extends StatelessWidget {
+class RoomsScreen extends StatefulWidget {
   const RoomsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final roomProvider = Provider.of<RoomProvider>(context);
+  State<RoomsScreen> createState() => _RoomsScreenState();
+}
 
+class _RoomsScreenState extends State<RoomsScreen> {
+  List<Map<String, dynamic>> _rooms = [];
+  bool _isLoading = false;
+  String? _usuarioId;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarUsuario();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadRooms();
+  }
+
+  Future<void> _carregarUsuario() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _usuarioId = prefs.getString('usuario_id');
+    });
+    await _loadRooms();
+  }
+
+  Future<void> _loadRooms() async {
+    setState(() => _isLoading = true);
+    if (_usuarioId != null) {
+      final api = ApiService();
+      final lista = await api.listarComodosPorUsuario(_usuarioId!);
+      setState(() {
+        _rooms = lista;
+      });
+    }
+    setState(() => _isLoading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cômodos'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: roomProvider.loadRooms,
+            onPressed: _loadRooms,
           ),
         ],
       ),
-      body: roomProvider.isLoading
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : roomProvider.rooms.isEmpty
+          : _rooms.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -53,16 +93,17 @@ class RoomsScreen extends StatelessWidget {
                   ),
                 )
               : ListView.builder(
-                  itemCount: roomProvider.rooms.length,
+                  itemCount: _rooms.length,
                   itemBuilder: (context, index) {
-                    final room = roomProvider.rooms[index];
+                    final room = _rooms[index];
                     return RoomCard(
-                      name: room.name,
+                      name: room['nome'] ?? '',
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => RoomDetailScreen(roomId: room.id),
+                            builder: (_) =>
+                                RoomDetailScreen(roomId: room['id']),
                           ),
                         );
                       },
@@ -70,7 +111,9 @@ class RoomsScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => RoomEditScreen(room: room),
+                            builder: (_) => RoomEditScreen(
+                                room: Room(
+                                    id: room['id'], name: room['nome'] ?? '')),
                           ),
                         );
                       },
