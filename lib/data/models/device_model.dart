@@ -62,7 +62,7 @@ class Device {
 
   factory Device.fromJson(Map<String, dynamic> json) {
     final type = DeviceType.values.firstWhere(
-      (e) => e.name == json['type'],
+      (e) => e.name == json['type'] || e.name == json['tipoDispositivo'],
       orElse: () => DeviceType.light,
     );
 
@@ -85,11 +85,11 @@ class Device {
     }
 
     return Device(
-      id: json['id'],
-      name: json['name'],
-      roomId: json['roomId'],
+      id: json['id'] ?? '',
+      name: json['name'] ?? json['nome'] ?? '',
+      roomId: json['roomId'] ?? json['comodoId'] ?? '',
       type: type,
-      isOn: json['isOn'] ?? false,
+      isOn: json['isOn'] ?? json['ligado'] ?? false,
       settings: settings,
     );
   }

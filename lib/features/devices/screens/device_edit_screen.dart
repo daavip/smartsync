@@ -5,6 +5,7 @@ import '../../../../data/models/device_model.dart';
 import '../../../../data/models/device_type.dart';
 import '../../../../data/providers/device_provider.dart';
 import '../../../../data/providers/room_provider.dart';
+import '../../../../core/services/api_service.dart';
 
 class DeviceEditScreen extends StatefulWidget {
   final Device device;
@@ -61,30 +62,27 @@ class _DeviceEditScreenState extends State<DeviceEditScreen> {
         await deviceProvider.updateDevice(updatedDevice);
       }
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Dispositivo salvo com sucesso!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        Navigator.pop(context);
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Dispositivo salvo com sucesso!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      Navigator.pop(context);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar dispositivo: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao salvar dispositivo: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      if (!mounted) return;
+      setState(() => _isSaving = false);
     }
   }
 
@@ -114,34 +112,29 @@ class _DeviceEditScreenState extends State<DeviceEditScreen> {
     HapticFeedback.mediumImpact();
 
     try {
-      final deviceProvider =
-          Provider.of<DeviceProvider>(context, listen: false);
-      await deviceProvider.deleteDevice(widget.device.id);
+      await ApiService().deletarDispositivo(widget.device.id);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Dispositivo excluído com sucesso!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        Navigator.pop(context);
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Dispositivo excluído com sucesso!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      Navigator.pop(context);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao excluir dispositivo: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao excluir dispositivo: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      if (!mounted) return;
+      setState(() => _isSaving = false);
     }
   }
 

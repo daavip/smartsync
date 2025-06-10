@@ -6,6 +6,7 @@ import 'ripple_effect.dart';
 import 'device_dialogs.dart';
 import '../../data/models/device_model.dart';
 import '../../data/models/device_type.dart';
+import '../services/api_service.dart';
 
 class DeviceCard extends StatelessWidget {
   final Device device;

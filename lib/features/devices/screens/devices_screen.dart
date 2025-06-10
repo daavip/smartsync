@@ -227,17 +227,30 @@ class _DevicesScreenState extends State<DevicesScreen> {
                     'tipoDispositivoId': tipoId,
                     'comodoId': comodoId,
                     'ligado': ligado,
-                    'tipoDispositivo': tipo,
                   };
+                  print('Tentando adicionar dispositivo:');
+                  print(dispositivoJson);
                   final api = ApiService();
-                  await api.addDispositivo(dispositivoJson);
-                  if (mounted) {
-                    Navigator.pop(context);
-                    await _loadDevices();
+                  try {
+                    await api.addDispositivo(dispositivoJson);
+                    if (!mounted) return;
+                    print('Dispositivo adicionado com sucesso!');
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                           content: Text('Dispositivo adicionado com sucesso!'),
                           backgroundColor: Colors.green),
+                    );
+                    Navigator.pop(context);
+                    await _loadDevices();
+                  } catch (e, s) {
+                    print('Erro ao adicionar dispositivo:');
+                    print(e);
+                    print(s);
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Erro ao adicionar dispositivo: $e'),
+                          backgroundColor: Colors.red),
                     );
                   }
                 }
@@ -266,14 +279,15 @@ class _DevicesScreenState extends State<DevicesScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _devices.isEmpty
               ? Center(child: Text('Nenhum dispositivo cadastrado'))
-              : ListView.builder(
-                  itemCount: _devices.length,
-                  itemBuilder: (context, index) {
-                    final device = _devices[index];
-                    return ListTile(
-                      leading: const Icon(Icons.devices),
-                      title: Text(device['nome'] ?? device['name'] ?? ''),
-                    );
+              : DeviceList(
+                  devices: _devices.map((d) => Device.fromJson(d)).toList(),
+                  onUpdateDevice: (Device updatedDevice) {
+                    setState(() {
+                      final idx = _devices.indexWhere((d) => d['id'] == updatedDevice.id);
+                      if (idx != -1) {
+                        _devices[idx] = updatedDevice.toJson();
+                      }
+                    });
                   },
                 ),
       floatingActionButton: FloatingActionButton(

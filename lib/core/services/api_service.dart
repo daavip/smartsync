@@ -75,9 +75,6 @@ class ApiService {
       Uri.parse('$baseUrl/api/Usuario?nome=$nome&email=$email'),
       headers: {'Content-Type': 'application/json'},
     );
-    print('URL chamada: $baseUrl/api/Usuario?nome=$nome&email=$email');
-    print('Status: ${response.statusCode}');
-    print('Resposta da API: ${response.body}');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data is List) {
@@ -186,4 +183,45 @@ class ApiService {
       throw Exception('Erro ao adicionar dispositivo: ${response.statusCode}');
     }
   }
+
+  Future<void> acionarDispositivo(String id, String acao) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/Dispositivo/$id/acao?acao=$acao'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'acao': acao}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Erro ao acionar dispositivo: ${response.statusCode}');
+    }
+  }
+
+  Future<void> deletarDispositivo(String id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/Dispositivo/$id'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Erro ao deletar dispositivo: ${response.statusCode}');
+    }
+  }
 }
+
+  Future<void> enviarAcaoComodo(String id, String acao) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/Comodo/$id/acao?acao=$acao'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao enviar ação: ${response.statusCode}');
+    }
+  }
+
+  Future<void> enviarAcaoResidencia(String id, String acao) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/Residencia/$id/acao?acao=$acao'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao enviar ação: ${response.statusCode}');
+    }
+  }
