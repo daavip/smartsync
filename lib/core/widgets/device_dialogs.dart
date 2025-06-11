@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smartsync/core/services/api_service.dart';
 import '../../data/models/device_model.dart';
 import '../../data/models/device_settings.dart';
 import '../constants/app_colors.dart';
@@ -25,10 +26,26 @@ class DeviceDialogs {
               SwitchListTile(
                 title: Text(isOn ? 'Ligada' : 'Desligada'),
                 value: isOn,
-                onChanged: (value) {
-                  setState(() => isOn = value);
-                  onUpdate(device.copyWith(isOn: isOn));
-                },
+                onChanged: (value) async {
+                                try {
+                                  final api = ApiService();
+                                  await api.enviarAcaoDispositivo(
+                                    device.id,
+                                    value ? 'Ligar' : 'Desligar',
+                                  );
+                                  setState(() {
+                                    device.isOn = value;
+                                  });
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Erro ao ${value ? 'ligar' : 'desligar'} o dispositivo: $e',
+                                      ),
+                                    ),
+                                  );
+                                }
+                }
               ),
               const Divider(),
               const Text('Brilho'),
@@ -383,10 +400,26 @@ class DeviceDialogs {
               SwitchListTile(
                 title: Text(isOn ? 'Ligado' : 'Desligado'),
                 value: isOn,
-                onChanged: (value) {
-                  setState(() => isOn = value);
-                  onUpdate(device.copyWith(isOn: isOn));
-                },
+                onChanged: (value) async {
+                  try {
+                    final api = ApiService();
+                    await api.enviarAcaoDispositivo(
+                      device.id,
+                      value ? 'Ligar' : 'Desligar',
+                    );
+                    setState(() {
+                      device.isOn = value;
+                    });
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Erro ao ${value ? 'ligar' : 'desligar'} o dispositivo: $e',
+                        ),
+                      ),
+                    );
+                  }
+                }
               ),
               const Divider(),
               Row(

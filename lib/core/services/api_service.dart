@@ -188,7 +188,6 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/api/Dispositivo/$id/acao?acao=$acao'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'acao': acao}),
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Erro ao acionar dispositivo: ${response.statusCode}');
@@ -204,7 +203,6 @@ class ApiService {
       throw Exception('Erro ao deletar dispositivo: ${response.statusCode}');
     }
   }
-}
 
   Future<void> enviarAcaoComodo(String id, String acao) async {
     final response = await http.post(
@@ -225,3 +223,14 @@ class ApiService {
       throw Exception('Erro ao enviar ação: ${response.statusCode}');
     }
   }
+  
+  Future<void> enviarAcaoDispositivo(String id, String acao) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/Dispositivo/$id/acao?acao=$acao'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao enviar ação: ${response.statusCode}');
+    }
+  }
+}
